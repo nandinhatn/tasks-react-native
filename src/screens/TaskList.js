@@ -1,14 +1,19 @@
 import React, {Component} from "react";
-import { SafeAreaView, View, Text, ImageBackground , StyleSheet, FlatList} from "react-native"
+import { SafeAreaView, View, Text, ImageBackground , StyleSheet, FlatList, TouchableOpacity, Platform} from "react-native"
 import moment from 'moment'
 import todayImage from '../imgs/today.jpg';
 import 'moment/locale/pt-br'
 import commonStyles from "../commonStyles";
 import Task from "./Task";
+import Icon from 'react-native-vector-icons/FontAwesome'
+import AddTask from "./addTask";
 
 export default class TaskList extends Component{
 
     state ={
+        showDoneTasks: true,
+        visibleTasks:[],
+        showAddTask: false,
         tasks :[
             {
             id: Math.random(),
@@ -25,6 +30,24 @@ export default class TaskList extends Component{
     
     ]
     }
+    componentDidMount  = ()=>{
+        this.filterTasks()
+    }
+    toggleFilter= ()=>{
+        this.setState({showDoneTasks: !this.state.showDoneTasks},this.filterTasks())
+        
+    }
+    filterTasks =()=>{
+        let visibleTasks =null
+        if(this.state.showDoneTasks){
+            visibleTasks =[...this.state.tasks]
+        }
+        else{
+            const pending = task => task.doneAt ===null
+            visibleTasks = this.state.tasks.filter(pending)
+        }
+        this.setState({visibleTasks})
+    }
     toggleTask = (taskId) =>{
      
        const  tasks =[...this.state.tasks]
@@ -33,13 +56,21 @@ export default class TaskList extends Component{
             task.doneAt = task.doneAt ? null : new Date()
         }
        })
-       this.setState({tasks})
+       this.setState({tasks},this.filterTasks())
+       
     }
     render(){
         const today = moment().locale('pt-br').format('ddd, D  [de] MMMM [de] YY' )
         return(
             <View style={styles.container}>
+                <AddTask isVisible={this.state.showAddTask} onCancel={()=> this.setState({showAddTask:false})} />
                 <ImageBackground source={todayImage} style={styles.background}>
+                    <View style={styles.iconBar}>
+                        <TouchableOpacity onPress={()=> this.toggleFilter()}>
+                            <Icon name={this.state.showDoneTasks ? 'eye': 'eye-slash'} size={30} color='white'/>
+                        </TouchableOpacity>
+
+                    </View>
                     <View style={styles.titleBar}>
                         <Text style={styles.title}> 
                             Hoje
@@ -50,11 +81,14 @@ export default class TaskList extends Component{
                 <View style={styles.taskList}>
 
               <FlatList
-               data={this.state.tasks} 
+               data={this.state.visibleTasks} 
                keyExtractor={item=> `${item.id}`} 
                renderItem={({item})=> <Task {...item} toggleTask={this.toggleTask}/>}/>
                
                 </View>
+                <TouchableOpacity style={styles.addButton} activeOpacity={0.9} onPress={()=>this.setState({showAddTask: true})}>
+                    <Icon name='plus' size={20} color={commonStyles.colors.secondary}/>
+                </TouchableOpacity>
             </View>
         )
     }
@@ -88,6 +122,25 @@ const styles = StyleSheet.create({
         paddingBottom:20,
         paddingLeft:10,
         fontFamily: commonStyles.fontFamily
+    },
+    iconBar:{
+        flexDirection: 'row',
+        justifyContent:'flex-end',
+        paddingVertical:20,
+        paddingHorizontal:20,
+        marginTop: Platform.OS === 'ios' ? 30:10
+
+    },
+    addButton:{
+        position:'absolute',
+        right:30,
+        bottom:30,
+        backgroundColor:commonStyles.colors.today,
+        width:50,
+        height:50,
+        borderRadius:25,
+        justifyContent:'center',
+        alignItems:'center'
     }
 
 })
