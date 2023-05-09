@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 export default props=>{
     return (
         <View style={[styles.container, props.style]}>
-            <Icon name={props.Icon} style={styles.icon}/>
+            <Icon name={props.icon} size={20} style={styles.icon}/>
             <TextInput {...props} style={styles.input}/>
         </View>
     )
@@ -21,7 +21,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#EEE',
         borderRadius: 20,
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginBottom: 20,
 
     },
     icon :{
@@ -31,6 +32,8 @@ const styles = StyleSheet.create({
     },
     input:{
        marginLeft: 20,
-       width:'70%'
+       width:'70%',
+       color: 'black'
+     
     }
 })
