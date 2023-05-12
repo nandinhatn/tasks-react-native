@@ -14,6 +14,9 @@ import {
 import  AsyncStorage from "@react-native-async-storage/async-storage"
 import moment from 'moment'
 import todayImage from '../imgs/today.jpg';
+import  tomorrowImage from   '../imgs/tomorrow.jpg';
+import weekImage from '../imgs/week.jpg'
+import monthImage from '../imgs/month.jpg'
 import 'moment/locale/pt-br'
 import commonStyles from "../commonStyles";
 import Task from "./Task";
@@ -43,7 +46,7 @@ export default class TaskList extends Component{
     }
     loadTasks= async()=>{
         try{
-            const maxDate = moment().format('YYYY-MM-DD 23:59:59')
+            const maxDate = moment().add({days: this.props.daysAhead}).format('YYYY-MM-DD 23:59:59')
           
             const res = await axios.get(`${server}/tasks/?date=${maxDate}`)
          
@@ -115,13 +118,32 @@ export default class TaskList extends Component{
         /* const tasks = this.state.tasks.filter(task => task.id !==id) */
       /*   this.setState({tasks}, this.filterTasks) */
     }
+    getImage=()=>{
+        switch(this.props.daysAhead){
+            case 0: return todayImage
+            case 1: return tomorrowImage
+            case 30: return monthImage
+            case 7: return weekImage 
+        }
+    }
+    getColor=()=>{
+        switch(this.props.daysAhead){
+            case 0: return commonStyles.colors.today
+            case 1: return commonStyles.colors.tomorrow
+            case 30: return commonStyles.colors.month
+            case 7: return commonStyles.colors.week
+    }
+}
     render(){
         const today = moment().locale('pt-br').format('ddd, D  [de] MMMM [de] YY' )
         return(
             <View style={styles.container}>
                 <AddTask isVisible={this.state.showAddTask} onCancel={()=> this.setState({showAddTask:false})} onSave={this.addTask}/>
-                <ImageBackground source={todayImage} style={styles.background}>
+                <ImageBackground source={this.getImage()} style={styles.background}>
                     <View style={styles.iconBar}>
+                        <TouchableOpacity onPress={()=> this.props.navigation.openDrawer()}>
+                            <Icon name ="bars" color='white' size={30}></Icon>
+                        </TouchableOpacity>
                         <TouchableOpacity onPress={()=> this.toggleFilter()}>
                             <Icon name={this.state.showDoneTasks ? 'eye': 'eye-slash'} size={30} color='white'/>
                         </TouchableOpacity>
@@ -129,7 +151,7 @@ export default class TaskList extends Component{
                     </View>
                     <View style={styles.titleBar}>
                         <Text style={styles.title}> 
-                            Hoje
+                           {this.props.title}
                         </Text>
                         <Text style={styles.txtToday}>{today}</Text>
                     </View>
@@ -143,7 +165,7 @@ export default class TaskList extends Component{
                onDelete={this.deleteTask}/>}/>
                
                 </View>
-                <TouchableOpacity style={styles.addButton} activeOpacity={0.9} onPress={()=>this.setState({showAddTask: true})}>
+                <TouchableOpacity style={[styles.addButton, {backgroundColor: this.getColor()}]} activeOpacity={0.9} onPress={()=>this.setState({showAddTask: true})}>
                     <Icon name='plus' size={20} color={commonStyles.colors.secondary}/>
                 </TouchableOpacity>
             </View>
@@ -182,7 +204,7 @@ const styles = StyleSheet.create({
     },
     iconBar:{
         flexDirection: 'row',
-        justifyContent:'flex-end',
+        justifyContent:'space-between',
         paddingVertical:20,
         paddingHorizontal:20,
         marginTop: Platform.OS === 'ios' ? 30:10
@@ -192,12 +214,14 @@ const styles = StyleSheet.create({
         position:'absolute',
         right:30,
         bottom:30,
-        backgroundColor:commonStyles.colors.today,
+       
         width:50,
         height:50,
         borderRadius:25,
         justifyContent:'center',
         alignItems:'center'
-    }
+    },
+   
 
 })
+
