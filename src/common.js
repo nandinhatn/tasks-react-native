@@ -6,7 +6,13 @@ const server = Platform.OS ==='ios'
 
 
 function showError(err){
-    Alert.alert('Ops ! Ocorreu um problema!', `Aviso: ${err}`)
+    if(err.response && err.response.data){
+
+        Alert.alert('Ops ! Ocorreu um problema!', `Aviso: ${err.response.data}`)
+    }else{
+
+        Alert.alert('Ops ! Ocorreu um problema!', `Aviso: ${err}`)
+    }
 }
 
 function showSucess(msg){

@@ -4,15 +4,15 @@ Alert} from 'react-native'
 import backgroundImage from '../imgs/login.jpg'
 import AuthInput from '../components/AuthInput';
 
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios'
 import { server, showSucess, showError } from '../common';
 import commonStyles from '../commonStyles';
-import axios from 'axios'
 
 
 const initialState ={
-     email:'nandinhatnl@gmail.com',
-        password:'123456',
+     email:'',
+        password:'',
         name:'',
         confirmPassword:'',
         stageNew : false
@@ -60,8 +60,9 @@ export default class Auth extends Component{
                 email: this.state.email,
                 password: this.state.password,
             })
+            AsyncStorage.setItem('userData',JSON.stringify(res.data))
             axios.defaults.headers.common['Authorization']= `bearer ${res.data.token}`
-            this.props.navigation.navigate('TaskList')
+            this.props.navigation.navigate('TaskList', res.data)
         }
         catch(e){
 
